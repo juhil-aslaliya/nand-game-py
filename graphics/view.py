@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QPainter, QPen
+from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsView
+from .edge_item import Edge
 
 class CanvasView(QGraphicsView):
     def __init__(self, scene):
@@ -50,3 +51,11 @@ class CanvasView(QGraphicsView):
         while y < rect.bottom():
             painter.drawLine(rect.left(), y, rect.right(), y) # type: ignore
             y += grid_size
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Delete:
+            for item in self.scene().selectedItems():
+                if isinstance(item, Edge):
+                    item.output_port.remove_edge(item)
+                    item.input_port.remove_edge(item)
+                    self.scene().removeItem(item)
+        return super().keyPressEvent(event)

@@ -8,14 +8,31 @@ from graphics.edge_item import Edge
 
 app = QApplication(sys.argv)
 scene = CanvasScene()
-node1 = Node(0, 0, 'Input')
-node2 = Node(300, 100, 'Process')
-edge = Edge(node1, node2)
-scene.addItem(edge)
+node1 = Node(
+    0,
+    0,
+    "Mathematics, we are actually checking its limits",
+    inputs=["A", "B"],
+    outputs=["Result"]
+)
+
+node2 = Node(
+    400,
+    200,
+    "Display",
+    inputs=["Value"],
+    outputs=[]
+)
+
 scene.addItem(node1)
 scene.addItem(node2)
-scene.addItem(Node(-200, -150))
-scene.addItem(Node(500, -250))
+
+edge = Edge(
+    node1.output_ports[0],
+    node2.input_ports[0]
+)
+
+scene.addItem(edge)
 view = CanvasView(scene)
 view.setWindowTitle('Canvas UI')
 view.resize(1400, 900)
