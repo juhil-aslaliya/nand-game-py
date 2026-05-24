@@ -1,9 +1,12 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, QPointF
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsView
 from .edge_item import Edge
+from .node_item import Node
 
 class CanvasView(QGraphicsView):
+    canvas_clicked = Signal(QPointF)
+
     def __init__(self, scene):
         super().__init__(scene)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
@@ -15,6 +18,12 @@ class CanvasView(QGraphicsView):
         self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.FullViewportUpdate)
         self.setBackgroundBrush(QColor(30, 30, 30))
         self.zoom = 1.0
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.canvas_clicked.emit(self.mapToScene(event.pos()))
+        super().mousePressEvent(event)
+
     def wheelEvent(self, event):
         if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
             zoom_in = 1.05
@@ -34,6 +43,7 @@ class CanvasView(QGraphicsView):
         delta = event.angleDelta()
         self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - delta.x())
         self.verticalScrollBar().setValue(self.verticalScrollBar().value() - delta.y())
+
     def drawBackground(self, painter, rect):
         super().drawBackground(painter, rect)
         grid_size = 50
@@ -51,11 +61,20 @@ class CanvasView(QGraphicsView):
         while y < rect.bottom():
             painter.drawLine(rect.left(), y, rect.right(), y) # type: ignore
             y += grid_size
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Delete:
             for item in self.scene().selectedItems():
                 if isinstance(item, Edge):
                     item.output_port.remove_edge(item)
                     item.input_port.remove_edge(item)
+                    self.scene().removeItem(item)
+                elif isinstance(item, Node):
+                    ports = item.input_ports + item.output_ports
+                    for port in ports:
+                        for edge in list(port.edges):
+                            edge.output_port.remove_edge(edge)
+                            edge.input_port.remove_edge(edge)
+                            self.scene().removeItem(edge)
                     self.scene().removeItem(item)
         return super().keyPressEvent(event)
