@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPen
+from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsView
 from .edge_item import Edge
 
@@ -16,7 +16,7 @@ class CanvasView(QGraphicsView):
         self.setBackgroundBrush(QColor(30, 30, 30))
         self.zoom = 1.0
     def wheelEvent(self, event):
-        if event.modifiers() and Qt.KeyboardModifier.ControlModifier:
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
             zoom_in = 1.05
             zoom_out = 0.95
             old_zoom = self.zoom

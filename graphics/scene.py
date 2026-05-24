@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QGraphicsScene
 from .edge_item import Edge, TemporaryEdge
+from .port_item import Port
 
 class CanvasScene(QGraphicsScene):
     def __init__(self):
@@ -24,3 +25,13 @@ class CanvasScene(QGraphicsScene):
         if self.dragging_edge:
             self.dragging_edge.set_target(event.scenePos())
         return super().mouseMoveEvent(event)
+        
+    def mouseReleaseEvent(self, event):
+        if self.dragging_edge:
+            for item in self.items(event.scenePos()):
+                if isinstance(item, Port) and item.port_type == Port.INPUT:
+                    self.finish_edge_drag(item)
+                    break
+            else:
+                self.cancel_edge_drag()
+        return super().mouseReleaseEvent(event)

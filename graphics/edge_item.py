@@ -38,6 +38,16 @@ class Edge(QGraphicsPathItem):
         path.lineTo(end_x, end_y)
         self.setPath(path)
 
+    def paint(self, painter, option, widget=None):
+        if self.isSelected():
+            pen = QPen(QColor(255, 200, 0))
+            pen.setWidth(6)
+            painter.setPen(pen)
+        else:
+            painter.setPen(self.pen())
+        painter.setBrush(self.brush())
+        painter.drawPath(self.path())
+
 class TemporaryEdge(QGraphicsPathItem):
     def __init__(self, start_port):
         super().__init__()

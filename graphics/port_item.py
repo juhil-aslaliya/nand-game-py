@@ -56,8 +56,3 @@ class Port(QGraphicsPathItem):
         if self.port_type == self.OUTPUT:
             scene.start_edge_drag(self)
         event.accept()
-    def mouseReleaseEvent(self, event):
-        scene = cast('CanvasScene', self.scene())
-        if self.port_type == self.INPUT and scene.dragging_edge:
-            scene.finish_edge_drag(self)
-        event.accept()

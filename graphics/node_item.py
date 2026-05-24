@@ -1,3 +1,4 @@
+import uuid
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPen, QBrush, QFont
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
@@ -10,7 +11,10 @@ class Node(QGraphicsRectItem):
     TOP_PADDING = 40
     BOTTOM_PADDING = 20
     PORT_SPACING = 20
-    def __init__(self, x, y, label='Node', inputs=None, outputs=None):
+    GRID_SIZE = 10
+    
+    def __init__(self, x, y, label='Node', inputs=None, outputs=None, node_id=None):
+        self.id = node_id or str(uuid.uuid4())
         self.inputs = inputs or []
         self.outputs = outputs or []
         self.height = self.compute_height()
@@ -33,6 +37,7 @@ class Node(QGraphicsRectItem):
         self.output_ports = []
         self.create_ports()
         self.update_layout()
+
     def compute_width(self):
         label_width = self.label.boundingRect().width()
         left_width = 0
@@ -42,10 +47,14 @@ class Node(QGraphicsRectItem):
         for port in self.output_ports:
             right_width = max(right_width, port.label.boundingRect().width())
         required_width = left_width + right_width + label_width + self.SIDE_PADDING * 4
-        return max(self.MIN_WIDTH, required_width)
+        width = max(self.MIN_WIDTH, required_width)
+        return round(width / self.GRID_SIZE) * self.GRID_SIZE
+
     def compute_height(self):
         rows = max(len(self.inputs), len(self.outputs), 1)
-        return self.TOP_PADDING + rows * self.PORT_SPACING + self.BOTTOM_PADDING
+        height = self.TOP_PADDING + rows * self.PORT_SPACING + self.BOTTOM_PADDING
+        return round(height / self.GRID_SIZE) * self.GRID_SIZE
+
     def create_ports(self):
         for name in self.inputs:
             port = Port(self, Port.INPUT, name)
@@ -53,6 +62,7 @@ class Node(QGraphicsRectItem):
         for name in self.outputs:
             port = Port(self, Port.OUTPUT, name)
             self.output_ports.append(port)
+
     def update_layout(self):
         self.height = self.compute_height()
         self.width = self.compute_width()
@@ -68,13 +78,13 @@ class Node(QGraphicsRectItem):
             port.label.setPos(-text_width - 15, -10)
         label_rect = self.label.boundingRect()
         label_x = (self.width - label_rect.width()) / 2
-        label_y = (self.height - label_rect.height()) / 2
+        label_y = (self.TOP_PADDING - label_rect.height()) / 2
         self.label.setPos(label_x, label_y)
+
     def itemChange(self, change, value):
         if change == QGraphicsRectItem.GraphicsItemChange.ItemPositionChange:
-            grid_size = 10
-            x = round(value.x() / grid_size) * grid_size
-            y = round(value.y() / grid_size) * grid_size
+            x = round(value.x() / self.GRID_SIZE) * self.GRID_SIZE
+            y = round(value.y() / self.GRID_SIZE) * self.GRID_SIZE
             return value.__class__(x, y)
         elif change == QGraphicsRectItem.GraphicsItemChange.ItemPositionHasChanged:
             ports = self.input_ports + self.output_ports
