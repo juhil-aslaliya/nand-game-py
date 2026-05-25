@@ -13,12 +13,12 @@ class Node(QGraphicsRectItem):
     PORT_SPACING = 20
     GRID_SIZE = 10
     
-    def __init__(self, x, y, label='Node', inputs=None, outputs=None, node_id=None):
+    def __init__(self, x, y, label='Node', inputs=None, outputs=None, node_id=None, function=None):
         self.id = node_id or str(uuid.uuid4())
         self.inputs = inputs or []
         self.outputs = outputs or []
+        self.function = function or ''
         self.height = self.compute_height()
-        # self.width = self.compute_width()
         super().__init__(0, 0, self.MIN_WIDTH, self.height)
         self.setPos(x, y)
         self.setBrush(QBrush(QColor(120, 120, 120)))

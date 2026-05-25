@@ -7,12 +7,20 @@ DEFAULT_TEMPLATES = [
     {
         "name": "NAND",
         "inputs": ["A", "B"],
-        "outputs": ["Out"]
+        "outputs": ["OUT"],
+        "function": "OUT = not (A and B)"
     },
     {
-        "name": "Display",
-        "inputs": ["Value"],
-        "outputs": []
+        "name": "Output Pin",
+        "inputs": ["Val"],
+        "outputs": [],
+        "function": ""
+    },
+    {
+        "name": "Input Pin",
+        "inputs": [],
+        "outputs": ["Val"],
+        "function": ""
     }
 ]
 

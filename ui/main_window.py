@@ -5,6 +5,7 @@ from graphics.view import CanvasView
 from graphics.scene import CanvasScene
 from graphics.node_item import Node
 from utils.serialization import save_to_file, load_from_file
+from core.evaluator import GraphEvaluator
 import os
 
 SAVE_FILE = 'save_state.json'
@@ -29,6 +30,7 @@ class MainWindow(QMainWindow):
         self.pending_node_template = None
         self.sidebar.template_selected.connect(self.set_pending_node)
         self.view.canvas_clicked.connect(self.handle_canvas_click)
+        self.sidebar.run_requested.connect(self.execute_graph)
 
         # Setup Splitter layout
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -93,7 +95,8 @@ class MainWindow(QMainWindow):
                 pos.y(),
                 label=self.pending_node_template["name"],
                 inputs=self.pending_node_template.get("inputs", []),
-                outputs=self.pending_node_template.get("outputs", [])
+                outputs=self.pending_node_template.get("outputs", []),
+                function=self.pending_node_template.get("function", "")
             )
             self.scene.addItem(node)
             
@@ -104,3 +107,6 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         save_to_file(self.scene, SAVE_FILE)
         super().closeEvent(event)
+    
+    def execute_graph(self):
+        GraphEvaluator.evaluate(self.scene)

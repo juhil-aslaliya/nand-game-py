@@ -8,6 +8,7 @@ from ui.dialogs import CreateNodeDialog
 
 class Sidebar(QFrame):
     template_selected = Signal(dict)
+    run_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -50,6 +51,12 @@ class Sidebar(QFrame):
                 margin-bottom: 5px;
             }
         """)
+
+        self.run_btn = QPushButton("Run")
+        self.run_btn.setStyleSheet("background-color: #2a82da; color: white;")
+        self.run_btn.clicked.connect(self.run_requested.emit)
+        self.main_layout.addWidget(self.run_btn)
+
 
         self.templates = load_templates()
 
