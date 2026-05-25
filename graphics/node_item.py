@@ -1,7 +1,7 @@
 import uuid
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPen, QBrush, QFont
-from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
+from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem, QGraphicsItem
 from .port_item import Port
 
 class Node(QGraphicsRectItem):
@@ -25,7 +25,7 @@ class Node(QGraphicsRectItem):
         pen = QPen(QColor(220, 220, 220))
         pen.setWidth(2)
         self.setPen(pen)
-        self.setFlags(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable | QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable | QGraphicsRectItem.GraphicsItemFlag.ItemSendsGeometryChanges)
+        self.setFlags(QGraphicsItem.GraphicsItemFlag.ItemIsMovable | QGraphicsItem.GraphicsItemFlag.ItemIsSelectable | QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges)
         self.label = QGraphicsTextItem(label)
         font = QFont()
         font.setPointSize(16)
@@ -82,11 +82,11 @@ class Node(QGraphicsRectItem):
         self.label.setPos(label_x, label_y)
 
     def itemChange(self, change, value):
-        if change == QGraphicsRectItem.GraphicsItemChange.ItemPositionChange:
+        if change == QGraphicsItem.GraphicsItemChange.ItemPositionChange:
             x = round(value.x() / self.GRID_SIZE) * self.GRID_SIZE
             y = round(value.y() / self.GRID_SIZE) * self.GRID_SIZE
             return value.__class__(x, y)
-        elif change == QGraphicsRectItem.GraphicsItemChange.ItemPositionHasChanged:
+        elif change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
             ports = self.input_ports + self.output_ports
             for port in ports:
                 for edge in port.edges:

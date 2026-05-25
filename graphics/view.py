@@ -55,11 +55,11 @@ class CanvasView(QGraphicsView):
         painter.setPen(pen)
         x = left
         while x < rect.right():
-            painter.drawLine(x, rect.top(), x, rect.bottom())  # type: ignore
+            painter.drawLine(x, int(rect.top()), x, int(rect.bottom())) 
             x += grid_size
         y = top
         while y < rect.bottom():
-            painter.drawLine(rect.left(), y, rect.right(), y) # type: ignore
+            painter.drawLine(int(rect.left()), y, int(rect.right()), y) 
             y += grid_size
 
     def keyPressEvent(self, event):

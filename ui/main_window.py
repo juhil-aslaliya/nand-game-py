@@ -35,6 +35,20 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(self.sidebar)
         self.splitter.addWidget(self.view)
         
+        # Remove the thick white band (handle) completely
+        self.splitter.setHandleWidth(0)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setStyleSheet(
+            "QSplitter { border: none; } "
+            "QSplitter::handle { background: none; }"
+        )
+        
+        from PySide6.QtWidgets import QFrame
+        self.view.setFrameShape(QFrame.Shape.NoFrame)
+
+        # Main window background color to prevent white flashes
+        self.setStyleSheet("QMainWindow { background-color: #2b2b2b; }")
+        
         # Make the canvas take up most of the space
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)

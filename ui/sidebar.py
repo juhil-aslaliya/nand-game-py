@@ -66,6 +66,16 @@ class Sidebar(QFrame):
         self.template_list.itemClicked.connect(self.on_item_clicked)
         self.main_layout.addWidget(self.template_list)
 
+        # Edit button
+        self.edit_btn = QPushButton("Edit Selected Template")
+        self.edit_btn.clicked.connect(self.edit_selected_template)
+        self.main_layout.addWidget(self.edit_btn)
+
+        # Delete button
+        self.delete_btn = QPushButton("Delete Selected Template")
+        self.delete_btn.clicked.connect(self.delete_selected_template)
+        self.main_layout.addWidget(self.delete_btn)
+
         self.refresh_list()
 
     def refresh_list(self):
@@ -86,4 +96,35 @@ class Sidebar(QFrame):
         for t in self.templates:
             if t["name"] == name:
                 self.template_selected.emit(t)
+                break
+
+    def delete_selected_template(self):
+        selected_items = self.template_list.selectedItems()
+        if not selected_items:
+            return
+        
+        name = selected_items[0].text()
+        
+        for t in self.templates:
+            if t["name"] == name:
+                self.templates.remove(t)
+                break
+                
+        save_templates(self.templates)
+        self.refresh_list()
+
+    def edit_selected_template(self):
+        selected_items = self.template_list.selectedItems()
+        if not selected_items:
+            return
+        
+        name = selected_items[0].text()
+        
+        for i, t in enumerate(self.templates):
+            if t["name"] == name:
+                dialog = CreateNodeDialog(self, template_data=t)
+                if dialog.exec():
+                    self.templates[i] = dialog.get_template_data()
+                    save_templates(self.templates)
+                    self.refresh_list()
                 break
