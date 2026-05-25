@@ -16,12 +16,20 @@ class Edge(QGraphicsPathItem):
         self.input_port = input_port
         output_port.add_edge(self)
         input_port.add_edge(self)
-        pen = QPen(QColor(220, 220, 220))
-        pen.setWidth(3)
+        self.is_live = False
         self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsSelectable)
-        self.setPen(pen)
         self.setZValue(-10)
+        self.update_visuals()
         self.update_position()
+    def set_live(self, state):
+        if self.is_live != state:
+            self.is_live = state
+            self.update_visuals()
+    def update_visuals(self):
+        color = QColor(65, 105, 225) if self.is_live else QColor(80, 80, 80)
+        pen = QPen(color)
+        pen.setWidth(5 if self.is_live else 3)
+        self.setPen(pen)
     def update_position(self):
         start_x, start_y = self.output_port.connection_pos()
         end_x, end_y = self.input_port.connection_pos()

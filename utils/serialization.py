@@ -15,9 +15,10 @@ def serialize_scene(scene):
                 "x": item.pos().x(),
                 "y": item.pos().y(),
                 "label": item.label.toPlainText(),
-                "inputs": item.inputs,
-                "outputs": item.outputs,
-                "function": getattr(item, 'function', "")
+                "inputs": [p.label.toPlainText() for p in item.input_ports],
+                "outputs": [p.label.toPlainText() for p in item.output_ports],
+                "function": getattr(item, 'function', ""),
+                "internal_graph": getattr(item, 'internal_graph', None)
             }
             nodes_data.append(node_data)
         elif isinstance(item, Edge):
@@ -58,7 +59,8 @@ def deserialize_scene(scene, data):
             inputs=node_data.get("inputs", []),
             outputs=node_data.get("outputs", []),
             node_id=node_data["id"],
-            function=node_data.get("function", "")
+            function=node_data.get("function", ""),
+            internal_graph=node_data.get("internal_graph", None)
         )
         scene.addItem(node)
         nodes_by_id[node.id] = node

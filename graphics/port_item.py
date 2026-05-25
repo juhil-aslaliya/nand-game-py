@@ -24,6 +24,7 @@ class Port(QGraphicsPathItem):
         self.setPath(self.build_triangle())
         self.label = QGraphicsTextItem(name)
         self.label.setDefaultTextColor(Qt.GlobalColor.white)
+        self.label.setTextInteractionFlags(Qt.TextInteractionFlag.TextEditorInteraction)
         self.label.setParentItem(self)
     def build_triangle(self):
         r = self.SIZE

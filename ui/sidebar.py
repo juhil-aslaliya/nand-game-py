@@ -9,6 +9,7 @@ from ui.dialogs import CreateNodeDialog
 class Sidebar(QFrame):
     template_selected = Signal(dict)
     run_requested = Signal()
+    save_comp_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -64,6 +65,11 @@ class Sidebar(QFrame):
         self.create_btn = QPushButton("Create New Node")
         self.create_btn.clicked.connect(self.open_create_dialog)
         self.main_layout.addWidget(self.create_btn)
+
+        self.save_comp_btn = QPushButton("Save Canvas as Component")
+        self.save_comp_btn.setStyleSheet("background-color: #2b7042; color: white;")
+        self.save_comp_btn.clicked.connect(self.save_comp_requested.emit)
+        self.main_layout.addWidget(self.save_comp_btn)
 
         # Label
         self.main_layout.addWidget(QLabel("Saved Templates:"))

@@ -1,11 +1,12 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter
+from PySide6.QtWidgets import QMainWindow, QSplitter, QInputDialog, QMessageBox
 from PySide6.QtCore import Qt
 from ui.sidebar import Sidebar
 from graphics.view import CanvasView
 from graphics.scene import CanvasScene
 from graphics.node_item import Node
-from utils.serialization import save_to_file, load_from_file
+from utils.serialization import save_to_file, load_from_file, serialize_scene
 from core.evaluator import GraphEvaluator
+from utils.templates import save_templates
 import os
 
 SAVE_FILE = 'save_state.json'
@@ -31,6 +32,9 @@ class MainWindow(QMainWindow):
         self.sidebar.template_selected.connect(self.set_pending_node)
         self.view.canvas_clicked.connect(self.handle_canvas_click)
         self.sidebar.run_requested.connect(self.execute_graph)
+        self.sidebar.save_comp_requested.connect(self.save_canvas_as_component)
+        
+        self.scene.graph_changed.connect(self.execute_graph)
 
         # Setup Splitter layout
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -96,7 +100,8 @@ class MainWindow(QMainWindow):
                 label=self.pending_node_template["name"],
                 inputs=self.pending_node_template.get("inputs", []),
                 outputs=self.pending_node_template.get("outputs", []),
-                function=self.pending_node_template.get("function", "")
+                function=self.pending_node_template.get("function", ""),
+                internal_graph=self.pending_node_template.get("internal_graph", None)
             )
             self.scene.addItem(node)
             
@@ -110,3 +115,33 @@ class MainWindow(QMainWindow):
     
     def execute_graph(self):
         GraphEvaluator.evaluate(self.scene)
+
+    def save_canvas_as_component(self):
+        from graphics.node_item import Node
+        input_pins = [item for item in self.scene.items() if isinstance(item, Node) and item.label.toPlainText() == "Input Pin"]
+        input_pins.sort(key=lambda n: n.y())
+        output_pins = [item for item in self.scene.items() if isinstance(item, Node) and item.label.toPlainText() == "Output Pin"]
+        output_pins.sort(key=lambda n: n.y())
+        if not input_pins and not output_pins:
+            QMessageBox.warning(self, "Missing Interface", "To create a component, your canvas must have atleast one Input Pin or Output Pin")
+            return
+        name, ok = QInputDialog.getText(self, "Save Component", "Enter new component name:")
+        if not ok or not name.strip():
+            return
+        sub_graph_data = serialize_scene(self.scene)
+        in_names = [pin.output_ports[0].label.toPlainText() for pin in input_pins if pin.output_ports]
+        
+        out_names = [pin.input_ports[0].label.toPlainText() for pin in output_pins if pin.input_ports]
+        
+        new_template = {
+            "name": name.strip(),
+            "inputs": in_names,
+            "outputs": out_names,
+            "internal_graph": sub_graph_data,
+            "function": ""
+        }
+        self.sidebar.templates.append(new_template)
+        save_templates(self.sidebar.templates)
+        self.sidebar.refresh_list()
+        QMessageBox.information(self, "Success", f"Component '{name}' added to sidebar")
+        self.scene.clear()

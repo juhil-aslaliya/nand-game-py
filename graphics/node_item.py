@@ -13,15 +13,16 @@ class Node(QGraphicsRectItem):
     PORT_SPACING = 20
     GRID_SIZE = 10
     
-    def __init__(self, x, y, label='Node', inputs=None, outputs=None, node_id=None, function=None):
+    def __init__(self, x, y, label='Node', inputs=None, outputs=None, node_id=None, function=None, internal_graph=None):
         self.id = node_id or str(uuid.uuid4())
         self.inputs = inputs or []
         self.outputs = outputs or []
         self.function = function or ''
+        self.internal_graph = internal_graph
+        self.pin_state = False
         self.height = self.compute_height()
         super().__init__(0, 0, self.MIN_WIDTH, self.height)
         self.setPos(x, y)
-        self.setBrush(QBrush(QColor(120, 120, 120)))
         pen = QPen(QColor(220, 220, 220))
         pen.setWidth(2)
         self.setPen(pen)
@@ -37,6 +38,7 @@ class Node(QGraphicsRectItem):
         self.output_ports = []
         self.create_ports()
         self.update_layout()
+        self.update_visuals()
 
     def compute_width(self):
         label_width = self.label.boundingRect().width()
@@ -92,3 +94,25 @@ class Node(QGraphicsRectItem):
                 for edge in port.edges:
                     edge.update_position()
         return super().itemChange(change, value)
+    
+    def update_visuals(self):
+        label_text = self.label.toPlainText()
+        if label_text in ["Input Pin", "Output Pin"]:
+            color = QColor(65, 105, 225) if self.pin_state else QColor(85, 85, 85)
+        else:
+            color = QColor(120, 120, 120)
+        self.setBrush(QBrush(color))
+
+    def mouseDoubleClickEvent(self, event):
+        if self.label.toPlainText() == "Input Pin":
+            # Toggle the internal state
+            self.pin_state = not self.pin_state
+            
+            port_name = self.output_ports[0].label.toPlainText() if self.output_ports else "Val"
+            self.function = f"{port_name} = {self.pin_state}"
+            # Repaint the node
+            self.update_visuals()
+            if hasattr(self.scene(), 'graph_changed'):
+                self.scene().graph_changed.emit()
+            
+        super().mouseDoubleClickEvent(event)

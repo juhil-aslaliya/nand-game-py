@@ -64,11 +64,14 @@ class CanvasView(QGraphicsView):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Delete:
+            items_deleted = False
             for item in self.scene().selectedItems():
                 if isinstance(item, Edge):
                     item.output_port.remove_edge(item)
                     item.input_port.remove_edge(item)
+                    item.set_live(False)
                     self.scene().removeItem(item)
+                    items_deleted = True
                 elif isinstance(item, Node):
                     ports = item.input_ports + item.output_ports
                     for port in ports:
@@ -77,4 +80,7 @@ class CanvasView(QGraphicsView):
                             edge.input_port.remove_edge(edge)
                             self.scene().removeItem(edge)
                     self.scene().removeItem(item)
+                    items_deleted = True
+            if items_deleted and hasattr(self.scene(), 'graph_changed'):
+                self.scene().graph_changed.emit()
         return super().keyPressEvent(event)
